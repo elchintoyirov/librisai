@@ -185,7 +185,8 @@ def cover_page():
         Paragraph("Group: 3",                         COVER_LEFT),
         Paragraph("Professor: Muxiddinov Muhriddin",  COVER_LEFT),
         sp(14),
-        Paragraph("Source Code: github.com/elchintoyirov/librisai", COVER_LEFT),
+        Paragraph('Source Code: <a href="https://github.com/elchintoyirov/librisai">'
+                  'https://github.com/elchintoyirov/librisai</a>', COVER_LEFT),
         sp(16),
         Paragraph("Tashkent - 2026", COVER_FOOT),
         PageBreak(),
@@ -886,18 +887,24 @@ def content():
     s += [h1("References")]
     s += [h2("Project Repository")]
     s += [bullet([
-        "<b>Libris AI — Source Code:</b> github.com/elchintoyirov/librisai",
+        '<b>Libris AI — Source Code:</b> <a href="https://github.com/elchintoyirov/librisai">'
+        'https://github.com/elchintoyirov/librisai</a>',
     ])]
     s += [h2("Core RAG Frameworks")]
     s += [bullet([
-        "<b>LangChain (RAG Guide):</b> python.langchain.com/docs/tutorials/rag/",
-        "<b>LlamaIndex (Concepts):</b> docs.llamaindex.ai/en/stable/getting_started/concepts/",
+        '<b>LangChain (RAG Guide):</b> <a href="https://python.langchain.com/docs/tutorials/rag/">'
+        'https://python.langchain.com/docs/tutorials/rag/</a>',
+        '<b>LlamaIndex (Concepts):</b> <a href="https://docs.llamaindex.ai/en/stable/getting_started/concepts/">'
+        'https://docs.llamaindex.ai/en/stable/getting_started/concepts/</a>',
     ])]
     s += [h2("Vector Databases & Search")]
     s += [bullet([
-        "<b>FAISS (Facebook AI):</b> github.com/facebookresearch/faiss",
-        "<b>Pinecone (RAG Learn):</b> pinecone.io/learn/retrieval-augmented-generation/",
-        "<b>Weaviate (RAG Blog):</b> weaviate.io/blog/what-is-rag",
+        '<b>FAISS (Facebook AI):</b> <a href="https://github.com/facebookresearch/faiss">'
+        'https://github.com/facebookresearch/faiss</a>',
+        '<b>Pinecone (RAG Learn):</b> <a href="https://www.pinecone.io/learn/retrieval-augmented-generation/">'
+        'https://www.pinecone.io/learn/retrieval-augmented-generation/</a>',
+        '<b>Weaviate (RAG Blog):</b> <a href="https://weaviate.io/blog/what-is-rag">'
+        'https://weaviate.io/blog/what-is-rag</a>',
     ])]
     s += [h2("Uzbek Language Resources")]
     s += [bullet([
@@ -908,11 +915,16 @@ def content():
     ])]
     s += [h2("Models & Tools Used")]
     s += [bullet([
-        "<b>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</b> — HuggingFace",
-        "<b>qwen2.5:7b</b> — Alibaba Cloud, served via Ollama (ollama.com)",
-        "<b>Docling</b> — IBM Research PDF extraction library",
-        "<b>pdfminer.six</b> — Python PDF text extraction",
-        "<b>rank-bm25</b> — Python BM25 implementation by D. Larson",
+        '<b>sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</b> — '
+        '<a href="https://huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2">'
+        'huggingface.co/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2</a>',
+        '<b>qwen2.5:7b</b> — Alibaba Cloud, served via <a href="https://ollama.com">ollama.com</a>',
+        '<b>Docling</b> — IBM Research: <a href="https://github.com/DS4SD/docling">'
+        'github.com/DS4SD/docling</a>',
+        '<b>pdfminer.six</b> — <a href="https://github.com/pdfminer/pdfminer.six">'
+        'github.com/pdfminer/pdfminer.six</a>',
+        '<b>rank-bm25</b> — <a href="https://github.com/dorianbrown/rank_bm25">'
+        'github.com/dorianbrown/rank_bm25</a>',
     ])]
 
     return s
