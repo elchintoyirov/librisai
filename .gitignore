@@ -33,6 +33,7 @@ Thumbs.db
 # Logs
 *.log
 
-# spec/ — generated PDF output and screenshot asset (sources tracked, output not)
+# spec/ — generated PDF output and screenshot assets (sources tracked, output not)
 spec/Libris_AI_Implementation_Report.pdf
 spec/swagger_ui.png
+spec/web_ui.png
