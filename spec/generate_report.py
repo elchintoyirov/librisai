@@ -184,7 +184,9 @@ def cover_page():
         sp(10),
         Paragraph("Group: 3",                         COVER_LEFT),
         Paragraph("Professor: Muxiddinov Muhriddin",  COVER_LEFT),
-        sp(30),
+        sp(14),
+        Paragraph("Source Code: github.com/elchintoyirov/librisai", COVER_LEFT),
+        sp(16),
         Paragraph("Tashkent - 2026", COVER_FOOT),
         PageBreak(),
     ]
@@ -882,6 +884,10 @@ def content():
 
     # ── References ────────────────────────────────────────────────────────────
     s += [h1("References")]
+    s += [h2("Project Repository")]
+    s += [bullet([
+        "<b>Libris AI — Source Code:</b> github.com/elchintoyirov/librisai",
+    ])]
     s += [h2("Core RAG Frameworks")]
     s += [bullet([
         "<b>LangChain (RAG Guide):</b> python.langchain.com/docs/tutorials/rag/",

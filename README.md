@@ -1,6 +1,6 @@
 # Libris AI
 
-A console-based RAG (Retrieval-Augmented Generation) application that lets students chat with their PDF textbooks in Uzbek and English.
+A web-based RAG (Retrieval-Augmented Generation) application that lets students upload PDF textbooks and chat with them in Uzbek and English — powered by a local LLM via Ollama.
 
 ---
 
@@ -29,11 +29,19 @@ PDF textbook
 [llm.py] ──────── Ollama local LLM (OpenAI-compatible API)
      │              Query preprocessing (strip question words)
      │              Language detection → Uzbek Latin / Cyrillic / English
-     │              Streamed answer to console
+     │              Token-by-token streaming via SSE
      │
      ▼
-[main.py] ─────── Console chat loop
-                   /books  /add  /switch  /clear  /help  /quit
+[api.py] ──────── FastAPI backend
+     │              GET  /books              — list all indexed books
+     │              POST /books/upload       — upload and ingest a PDF
+     │              DELETE /books/{id}       — delete book and its index
+     │              POST /chat/stream        — streaming chat (SSE)
+     │
+     ▼
+[static/] ─────── Web UI
+                   Book list + upload in sidebar
+                   Streaming chat with source attribution
 ```
 
 ### Stack
@@ -46,8 +54,33 @@ PDF textbook
 | Vector store | FAISS (CPU, AVX2) |
 | Keyword retrieval | `rank-bm25` via `langchain-community` |
 | LLM | Ollama local (default: `qwen2.5:7b`) |
+| Web backend | FastAPI + Uvicorn |
+| File upload | `python-multipart` |
 | Package manager | `uv` |
 | Python | 3.12+ |
+
+---
+
+## Project Structure
+
+```
+librisai/
+├── api.py                  # FastAPI app — all HTTP endpoints
+├── libris/
+│   ├── ingest.py           # PDF extraction, chunking, FAISS indexing
+│   ├── retriever.py        # Hybrid BM25+FAISS retriever with RRF
+│   ├── llm.py              # LLM client, prompt building, SSE streaming
+│   └── store.py            # books.json metadata store (list/get/delete)
+├── static/
+│   ├── index.html          # Single-page web UI
+│   ├── style.css           # Light theme styles
+│   └── app.js              # Vanilla JS: book list, upload, streaming chat
+├── data/                   # Created at runtime (gitignored)
+│   ├── books/              # Uploaded PDF copies
+│   ├── indexes/            # Per-book FAISS indexes
+│   └── books.json          # Book metadata registry
+└── pyproject.toml          # All dependencies (managed with uv)
+```
 
 ---
 
@@ -62,12 +95,30 @@ uv sync
 ollama pull qwen2.5:7b
 ```
 
+Start Ollama (separate terminal):
+
 ```bash
-ollama serve       # separate terminal
-python main.py
+ollama serve
 ```
 
-Inside the app, use `/add` to ingest a PDF textbook.
+Start the web server:
+
+```bash
+uvicorn api:app --reload
+```
+
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+---
+
+## Using the App
+
+1. Click **+ Add Textbook** in the sidebar and select a PDF file.
+2. Wait for ingestion to complete (a toast notification confirms it).
+3. Click the book name to open a chat session.
+4. Type your question and press **Send** — the answer streams back token by token.
+5. Source chunks are shown below each AI response.
+6. Click **↺ New chat** to clear history and start a fresh conversation.
 
 ---
 
@@ -89,15 +140,7 @@ The current model (`paraphrase-multilingual-MiniLM-L12-v2`) covers 50+ languages
 
 ---
 
-### 3. Multi-Turn Conversation with Memory
-
-The app tracks `history: list[tuple[str, str]]` per session but never passes it to the LLM. Each question is answered in isolation — the model cannot refer back to previous answers.
-
-**Improvement:** Pass the last N turns as additional context in the user message, or use a summarisation step to compress history into a running context window. This would allow natural follow-up questions like "tell me more about that" or "what happened next?"
-
----
-
-### 4. Stronger Local LLM for Uzbek
+### 3. Stronger Local LLM for Uzbek
 
 `qwen2.5:7b` produces readable but grammatically imperfect Uzbek. It occasionally switches scripts or omits case suffixes.
 
@@ -105,7 +148,7 @@ The app tracks `history: list[tuple[str, str]]` per session but never passes it 
 
 ---
 
-### 5. OCR for Scanned Textbooks
+### 4. OCR for Scanned Textbooks
 
 Many Uzbek school textbooks only exist as scanned PDFs (image pages, no text layer). The current pipeline fails silently on these — pdfminer returns empty text.
 
@@ -119,15 +162,15 @@ if chars_per_page < 100:
 
 ---
 
-### 6. Web or Telegram Interface
+### 5. Telegram Bot Interface
 
-The console UI is functional but limits adoption by students. Most Uzbek students use Telegram daily.
+Most Uzbek students use Telegram daily. A bot interface would make the app accessible without any installation or browser.
 
-**Improvement:** Add a Telegram bot interface using `aiogram`. Each user gets their own book selection and session. The bot can forward streamed responses chunk-by-chunk using message edit updates. A FastAPI web interface would also make it accessible without any installation.
+**Improvement:** Add a Telegram bot using `aiogram`. Each user gets their own book selection and session. The bot can forward streamed responses chunk-by-chunk using message edit updates.
 
 ---
 
-### 7. Per-Page Chunk Metadata
+### 6. Per-Page Chunk Metadata
 
 Currently chunks only store `source` (filename) and `chunk_index`. There is no page number attached to each chunk, so the app cannot tell the student which page to open for more context.
 
@@ -135,15 +178,15 @@ Currently chunks only store `source` (filename) and `chunk_index`. There is no p
 
 ---
 
-### 8. Chunk Quality Filtering
+### 7. Chunk Quality Filtering
 
-pdfminer extracts everything including page numbers, headers, footers, table-of-contents lines, and image captions. These low-value chunks dilute retrieval — a query may pull a page number ("47") or a caption ("<!-- image -->") instead of body text.
+pdfminer extracts everything including page numbers, headers, footers, table-of-contents lines, and image captions. These low-value chunks dilute retrieval.
 
 **Improvement:** Filter chunks at ingestion time: discard any chunk under 100 characters, chunks that are purely numeric, or chunks matching known header/footer patterns. A simple regex pass would eliminate most noise.
 
 ---
 
-### 9. Reranker After Retrieval
+### 8. Reranker After Retrieval
 
 The current pipeline retrieves the top 6 chunks by RRF score and passes all of them to the LLM. Some of the 6 may be irrelevant even after fusion.
 
@@ -151,7 +194,7 @@ The current pipeline retrieves the top 6 chunks by RRF score and passes all of t
 
 ---
 
-### 10. Evaluation Dataset
+### 9. Evaluation Dataset
 
 There is currently no way to measure whether a code change improved or degraded retrieval and answer quality. Changes are evaluated by manually testing a few questions.
 
