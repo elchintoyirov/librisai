@@ -1,0 +1,19 @@
+[project]
+name = "librisai"
+version = "0.1.0"
+description = "Chat with your PDF textbooks using local LLMs and hybrid RAG"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "docling>=2.87.0",
+    "pdfminer.six>=20221105",
+    "langchain>=0.3.0",
+    "langchain-community>=0.3.0",
+    "langchain-huggingface>=0.1.0",
+    "langchain-text-splitters>=0.3.0",
+    "sentence-transformers>=3.0.0",
+    "faiss-cpu>=1.8.0",
+    "rank-bm25>=0.2.2",
+    "openai>=1.30.0",
+    "python-dotenv>=1.0.0",
+]
