@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Libris AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">📚 Libris AI</div>
+
+    <label class="upload-btn">
+      + Add Textbook
+      <input type="file" id="file-input" accept=".pdf" hidden />
+    </label>
+
+    <div id="upload-status" class="upload-status hidden">Uploading…</div>
+
+    <ul id="book-list" class="book-list"></ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <div id="empty-state" class="empty-state">
+      <div class="empty-icon">📖</div>
+      <h2>Select a textbook</h2>
+      <p>Choose from the sidebar or add a new PDF.</p>
+    </div>
+
+    <div id="chat-area" class="chat-area hidden">
+
+      <div class="chat-header">
+        <div>
+          <div id="chat-title" class="chat-title"></div>
+          <div id="chat-meta"  class="chat-meta"></div>
+        </div>
+        <button id="clear-btn" class="clear-btn" title="New conversation">↺ New chat</button>
+      </div>
+
+      <div id="messages" class="messages"></div>
+
+      <form id="chat-form" class="input-bar">
+        <textarea id="question-input" rows="1"
+          placeholder="Ask anything about this book…"></textarea>
+        <button id="send-btn" type="submit">Send</button>
+      </form>
+
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

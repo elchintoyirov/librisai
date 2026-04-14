@@ -1,11 +1,15 @@
 """
 llm.py — Ollama-powered RAG answering via the OpenAI-compatible API.
 
-Streams the answer token-by-token to stdout.
-
-Usage:
+Console usage:
     from libris.llm import ask
     answer, source_docs = ask("Ibtidoiy jamoa tuzumi nima?", retriever)
+
+API / streaming usage:
+    from libris.llm import build_messages, stream_tokens
+    source_docs, messages = build_messages(question, retriever)
+    for token in stream_tokens(messages):
+        yield token
 """
 
 from openai import OpenAI
@@ -121,3 +125,55 @@ def ask(
 
     print()
     return "".join(answer_parts), source_docs
+
+
+# ── API helpers ───────────────────────────────────────────────────────────────
+
+def build_messages(
+    question: str,
+    retriever,
+    history: list[dict] | None = None,
+) -> tuple[list, list]:
+    """
+    Build the LLM message list for a question + optional chat history.
+
+    Returns (source_docs, messages).
+    The caller can pass messages to stream_tokens() or use them directly.
+    History items must be {"role": "user"|"assistant", "content": "..."}.
+    """
+    retrieval_query = _query_for_retrieval(question)
+    source_docs     = retriever.invoke(retrieval_query)
+    context         = "\n\n---\n\n".join(doc.page_content for doc in source_docs)
+    lang_instruction = _detect_language(question)
+
+    user_content = (
+        f"{lang_instruction}\n\n"
+        f"Textbook excerpts:\n{context}\n\n"
+        f"Question: {question}"
+    )
+
+    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if history:
+        messages.extend(history)
+    messages.append({"role": "user", "content": user_content})
+
+    return source_docs, messages
+
+
+def stream_tokens(messages: list[dict], model: str = DEFAULT_MODEL):
+    """
+    Yield answer tokens one-by-one from Ollama.
+    Designed for use with FastAPI StreamingResponse.
+    """
+    client = _get_client()
+    with client.chat.completions.create(
+        model=model,
+        messages=messages,
+        max_tokens=1024,
+        temperature=0,
+        stream=True,
+    ) as stream:
+        for chunk in stream:
+            delta = chunk.choices[0].delta
+            if delta.content:
+                yield delta.content
