@@ -171,6 +171,7 @@ def cover_page():
         sp(14),
         Paragraph("Faculty: Software Engineering", COVER_FAC),
         Paragraph("Project Implementation", COVER_RED),
+        Paragraph("Deadline #3", COVER_RED),
         Paragraph("Fundamentals of Artificial Intelligence", COVER_FAC),
         sp(18),
         logo,
@@ -946,6 +947,9 @@ def build():
         pagesize=A4,
         leftMargin=3*cm, rightMargin=2.5*cm,
         topMargin=2*cm,  bottomMargin=2*cm,
+        title="Deadline #3",
+        author="Toyirov Elchin",
+        subject="Libris AI — Academic Textbook Assistant",
     )
     story = cover_page() + content()
     doc.build(story, onFirstPage=on_page, onLaterPages=on_page)

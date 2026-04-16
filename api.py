@@ -49,6 +49,8 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     app.state.retrievers: dict = {}
+    from libris.retriever import _get_embeddings
+    _get_embeddings()
 
 
 def _get_retriever(book_id: str):
